@@ -1,0 +1,50 @@
+﻿@Html.IndexPageInit()
+<h2>@ViewBag.Name</h2>
+@using (Ajax.BeginForm(null, null, (AjaxOptions)ViewBag.AjaxOpts, new { id = "searchForm" }))
+{ 
+    <table>
+        <tr>
+            <td>
+                <span class="searchLabel">测试时间</span>
+            </td>
+            <td>
+                <span class="searchLabel">序列号</span>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            @Html.Hidden("returnRoot", (string)ViewBag.ReturnRoot)
+            @Html.Hidden("actionAjax", (string)ViewBag.Action)
+            @Html.Hidden("filter")
+            <td>
+                @Html.TextBox("TestTime@>=", null, new { @class = "filter Wdate", style = "width: 100px;", onFocus = "WdatePicker(({lang:'zh-cn'}))" })
+                @Html.DropDownList("TestTimeStartHour@>=", new SelectList(@Html.GetHoursList(), "Value", "Text"), String.Empty, new { @class = "filter", style = "width: 50px;" })
+                至
+                @Html.TextBox("TestTime@<=", null, new { @class = "filter Wdate", style = "width: 100px;", onFocus = "WdatePicker(({lang:'zh-cn'}))" })
+                @Html.DropDownList("TestTimeStopHour@<=", new SelectList(@Html.GetHoursList(), "Value", "Text"), String.Empty, new { @class = "filter", style = "width: 50px;" })
+            </td>
+            <td>
+                @Html.TextBox("SerialNumber.Name@%", null, new { @class = "filter" })
+            </td>
+            <td>
+                <button type="submit">查询</button>
+            </td>
+        </tr>
+    </table>
+}
+<div id="AjaxBody">
+    @Html.Action((string)ViewBag.Action, (RouteValueDictionary)(ViewBag.RV))
+</div>
+<!-- jquery ui css-->
+@section Styles {
+    <link href="@Url.Content("~/Scripts/My97DatePicker/skin/WdatePicker.css")" rel="stylesheet" type="text/css" />
+}
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script type="text/javascript" src="@Url.Content("~/Scripts/My97DatePicker/WdatePicker.js")"></script>
+    <script>
+        $(document).ready(function () {
+            $("#searchForm").submit(function (e) { setFilter(); });
+        });
+    </script>
+}

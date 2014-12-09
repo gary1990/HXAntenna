@@ -23,6 +23,9 @@
                 <span class="searchLabel">用户名</span>
             </th>
             <th>
+                @Html.DisplayNameFor(model => model.AntennaRoleId)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.IsDeleted)
             </th>
             <th></th>
@@ -37,6 +40,9 @@
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.UserName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.AntennaRole.Name)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.IsDeleted)

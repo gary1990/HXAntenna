@@ -1,0 +1,59 @@
+﻿@model IEnumerable<TestResult>
+@{
+    string returnUrl = Url.Action((((RouteValueDictionary)(ViewBag.RV))["returnRoot"]).ToString(), (RouteValueDictionary)(ViewBag.RV));
+    Layout = null;
+}
+@Html.Partial("PageLink")
+<table>
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.TestTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SerialNumberId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Result)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TestTime)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SerialNumber.Name)
+                </td>
+                <td>
+                    @if (!item.Result)
+                    {
+                        <span style="color:green;">合格</span>
+                    }
+                    else
+                    {
+                        <span style="color:red;">不合格</span>
+                    }
+                </td>
+                <td>
+                    <div class="groupOperation">
+                        @{
+                            using (Html.BeginForm("Details", (string)ViewBag.Controller))
+                            {
+                                @Html.AntiForgeryToken()
+                                
+                                @Html.Hidden("id", item.Id)
+                                @Html.Hidden("returnUrl", returnUrl)
+                                <input type="submit" value="详情" />
+                            }
+                        }
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

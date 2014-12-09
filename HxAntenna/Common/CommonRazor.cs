@@ -36,6 +36,26 @@ namespace System.Web.Mvc.Html
             };
             return null;
         }
+
+        public static List<SelectListItem> GetHoursList(this HtmlHelper htmlHelper)
+        {
+            List<SelectListItem> hours = new List<SelectListItem>();
+            hours.Add(new SelectListItem { Text = "00", Value = "00" });
+            hours.Add(new SelectListItem { Text = "01", Value = "01" });
+            hours.Add(new SelectListItem { Text = "02", Value = "02" });
+            hours.Add(new SelectListItem { Text = "03", Value = "03" });
+            hours.Add(new SelectListItem { Text = "04", Value = "04" });
+            hours.Add(new SelectListItem { Text = "05", Value = "05" });
+            hours.Add(new SelectListItem { Text = "06", Value = "06" });
+            hours.Add(new SelectListItem { Text = "07", Value = "07" });
+            hours.Add(new SelectListItem { Text = "08", Value = "08" });
+            hours.Add(new SelectListItem { Text = "09", Value = "09" });
+            for (int i = 10; i <= 23; i++)
+            {
+                hours.Add(new SelectListItem { Text = i.ToString(), Value = i.ToString() });
+            }
+            return hours;
+        }
     }
 
     public static class AuthorizeActionLinkExtention 
