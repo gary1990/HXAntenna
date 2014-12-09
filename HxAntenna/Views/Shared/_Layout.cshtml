@@ -1,0 +1,127 @@
+﻿@{
+    var menuPath = "";
+    var sideMenuPath = "";
+    if(ViewBag.path != null)
+    {
+        var pathList = ViewBag.path as List<string>;
+        menuPath = pathList[0];  
+        if(pathList.Count > 1)
+        {
+            sideMenuPath = pathList[1];
+        }
+    }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title-Antenna</title>
+    <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+    <meta name="viewport" content="width=device-width" />
+    @Styles.Render("~/Content/css")
+    @Styles.Render("~/Content/customCss/foo")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/custom")
+    @RenderSection("styles", required: false)
+</head>
+<body>
+    <header>
+        <div class="content-wrapper">
+            <div class="float-left">
+                <p class="site-title">@Html.AuthorizeActionLink("天线", "Index", "Home")</p>
+            </div>
+            <div class="float-right">
+                <section id="login">
+                    @Html.Partial("_LoginPartial")
+                </section>
+            </div>
+        </div>
+        <nav>
+            <ul id="menu">
+                <li>@Html.AuthorizeActionLink("首页", "Index", "Home")</li>
+
+                @if (ViewBag.path != null && ViewBag.path[0] == "测试管理")
+                {
+                    <li class="current">@Html.AuthorizeActionLink("测试管理", "Index", "TestManageHome")
+                        <ul class="sideMenu">
+                           
+                        </ul>
+                    </li>
+                }
+                else
+                {
+                    <li>@Html.AuthorizeActionLink("测试管理", "Index", "TestManageHome")</li>
+                }
+
+                @if (ViewBag.path != null && ViewBag.path[0] == "质量管理")
+                {
+                    <li class="current">@Html.AuthorizeActionLink("质量管理", "Index", "QualityManageHome")
+                        <ul class="sideMenu">
+                            <li class="@(sideMenuPath == "测试记录" ? "current" : "")">@Html.AuthorizeActionLink("测试记录", "Index", "TestRecord")</li>
+                        </ul>
+                    </li>
+                }
+                else
+                {
+                    <li>@Html.AuthorizeActionLink("质量管理", "Index", "QualityManageHome")</li>
+                }
+
+                @if (ViewBag.path != null && ViewBag.path[0] == "系统管理")
+                {
+                    <li class="current">@Html.AuthorizeActionLink("系统管理", "Index", "SystemHome")
+                        <ul class="sideMenu">
+                            <li class="@(sideMenuPath == "用户管理" ? "current" : "")">@Html.AuthorizeActionLink("用户管理", "Index", "UserProfile")</li>
+                        </ul>
+                    </li>
+                }
+                else
+                {
+                    <li>@Html.AuthorizeActionLink("系统管理", "Index", "SystemHome")</li>
+                }
+            </ul>
+            <div class="clear-fix"></div>
+        </nav>
+        <div class="sideMenu">
+            <div>
+                @if (ViewBag.path != null)
+                {
+                    int i = 0;
+                    foreach (string tmpStr in ViewBag.path)
+                    {
+                        if (i++ == 0)
+                        {
+                            continue;
+                        }
+                    @tmpStr <span>></span>
+                    }
+                }
+            </div>
+        </div>
+    </header>
+    <div id="body">
+        @RenderSection("featured", required: false)
+        <section class="content-wrapper main-content clear-fix">
+            <div style="width: 100%">
+                <div style="width: 96%; margin: 0 2%;" class="box">
+                    @Html.Partial("Msg")
+                    @RenderBody()
+                </div>
+            </div>
+        </section>
+    </div>
+    <div class="float-left" style="height: 100px; clear: both">&nbsp;</div>
+    <footer>
+        <div class="content-wrapper" style="clear: both">
+            <div class="float-left">
+                <p>&copy;Gemcycle Quality Managment</p>
+            </div>
+        </div>
+    </footer>
+
+    @RenderSection("scripts", required: false)
+    <script>
+        $("#msg").delay(3000).fadeOut(500);
+    </script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+﻿@model IEnumerable<AntennaUser>
+@{
+    string returnUrl = Url.Action((((RouteValueDictionary)(ViewBag.RV))["returnRoot"]).ToString(), (RouteValueDictionary)(ViewBag.RV));
+    Layout = null;
+}
+<p>
+    @using (Html.BeginForm("Create", (string)ViewBag.Controller))
+    {
+        @Html.AntiForgeryToken()
+
+        @Html.Hidden("returnUrl", returnUrl)
+        <input type="submit" value="新建" />
+    }
+</p>
+@Html.Partial("PageLink")
+<table>
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.JobNumber)
+            </th>
+            <th>
+                <span class="searchLabel">用户名</span>
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsDeleted)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.JobNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UserName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.IsDeleted)
+                </td>
+                <td>
+                    <div class="groupOperation">
+                        @if (item.IsDeleted)
+                        {
+                            using (Html.BeginForm("Restore", (string)ViewBag.Controller))
+                            {
+                                @Html.AntiForgeryToken()
+
+                                @Html.Hidden("id", item.Id)
+                                @Html.Hidden("returnUrl", returnUrl)
+                                <input type="submit" value="恢复" />
+                            }
+                        }
+                        else
+                        {
+                            using (Html.BeginForm("Edit", (string)ViewBag.Controller))
+                            {
+                                @Html.AntiForgeryToken()
+
+                                @Html.Hidden("id", item.Id)
+                                @Html.Hidden("returnUrl", returnUrl)
+                                <input type="submit" value="编辑" />
+                            }
+                            using (Html.BeginForm("ResetPassword", (string)ViewBag.Controller))
+                            {
+                                @Html.AntiForgeryToken()
+
+                                @Html.Hidden("id", item.Id)
+                                @Html.Hidden("returnUrl", returnUrl)
+                                <input type="submit" value="重置密码" />
+                            }
+                            using (Html.BeginForm("Delete", (string)ViewBag.Controller))
+                            {
+                                @Html.AntiForgeryToken()
+
+                                @Html.Hidden("id", item.Id)
+                                @Html.Hidden("returnUrl", returnUrl)
+                                <input type="submit" value="删除" />
+                            }
+                        }
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

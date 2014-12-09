@@ -1,0 +1,48 @@
+﻿@model HxAntenna.Models.LoginViewModel
+
+@{
+    ViewBag.Title = "Log in";
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+}
+
+<div class="body-div">
+    <div>
+        <section id="loginForm" style="text-align:center;">
+            @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+                <div class="login-group" style="text-align:center;margin-top:20px;">
+                    <label style="display: inline-block; float: left; margin-bottom: 0px; line-height: 35px; ">工号</label>
+                    <div>
+                        @Html.TextBoxFor(m => m.JobNumber, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.JobNumber)
+                    </div>
+                </div>
+                <div class="login-group" style="text-align:center;margin-top:20px;">
+                    <label style="display:inline-block;float:left;margin-bottom:0px;line-height:35px;">密码</label>
+                    <div>
+                        @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.Password)
+                    </div>
+                </div>
+                <div style="text-align:center;margin-top:20px;">
+                    <div class="checkbox" style="text-align:left;float:left;margin-top:10px;width:270px;">
+                        <div>
+                            @Html.CheckBoxFor(m => m.RememberMe)
+                            @Html.LabelFor(m => m.RememberMe)
+                        </div>
+                    </div>
+                    <div style="text-align:right;margin-left:30px;">
+                        <div style="text-align:right;margin-left:30px;">
+                            <input type="submit" value="登录" class="btn btn-default" />
+                        </div>
+                    </div>
+                </div>
+            }
+        </section>
+    </div>
+</div>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

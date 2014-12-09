@@ -1,0 +1,53 @@
+﻿@Html.IndexPageInit()
+<h2>@ViewBag.Name</h2>
+@using (Ajax.BeginForm(null, null, (AjaxOptions)ViewBag.AjaxOpts, new { id = "searchForm" }))
+{
+    <table>
+        <tr>
+            <td>
+                <span class="searchLabel">工号</span>
+            </td>
+            <td>
+                <span class="searchLabel">用户名</span>
+            </td>
+            <td>
+                <span class="searchLabel">角色</span>
+            </td>
+            <td>
+                <span class="searchLabel">已删除</span>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            @Html.Hidden("returnRoot", (string)ViewBag.ReturnRoot)
+            @Html.Hidden("actionAjax", (string)ViewBag.Action)
+            @Html.Hidden("filter")
+            <td>
+                @Html.TextBox("JobNumber@%", null, new { @class = "filter" })
+            </td>
+            <td>
+                @Html.TextBox("UserName@%", null, new { @class = "filter" })
+            </td>
+            <td>
+                @Html.DropDownList("AntennaRoleId@=", new SelectList(Common<AntennaRole>.GetList(), "Id", "Name"), String.Empty, new { @class = "filter" })
+            </td>
+            <td>
+                @Html.CheckBox("IsDeleted@=", new { @class = "filter"})
+            </td>
+            <td>
+                <button type="submit">查询</button>
+            </td>
+        </tr>
+    </table>
+}
+<div id="AjaxBody">
+    @Html.Action((string)ViewBag.Action, (RouteValueDictionary)(ViewBag.RV))
+</div>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        $(document).ready(function () {
+            $("#searchForm").submit(function (e) { setFilter(); });
+        });
+    </script>
+}

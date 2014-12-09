@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title-Antenna</title>
+    <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+    <meta name="viewport" content="width=device-width" />
+    @Styles.Render("~/Content/css")
+    @Styles.Render("~/Content/customCss/foo")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/custom")
+    @RenderSection("styles", required: false)
+</head>
+<body>
+    <div id="body">
+        @RenderSection("featured", required: false)
+        <div class="logo_appName head-div">
+            <img class="logo" src="~/Content/img/gemcycle.png">
+        </div>
+        <div class="title-div">
+            <div class="appName">
+                <div>Quality Managment System</div>
+            </div>
+        </div>
+        @RenderBody()
+    </div>
+     <footer class="login">
+        <div>
+            <div>
+                <p class="footer-login">&copy;Quality Managment System 1.0.0.0,Powered by Gemcycle</p>
+            </div>
+        </div>
+    </footer>
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>

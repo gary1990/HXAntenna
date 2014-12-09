@@ -1,0 +1,24 @@
+﻿@model AntennaUser
+@Html.HiddenFor(model => model.Id)
+
+<div class="editor-label">
+    @Html.LabelFor(model => model.JobNumber)
+</div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.JobNumber)
+    @Html.ValidationMessageFor(model => model.JobNumber)
+</div>
+<div class="editor-label">
+    <label for="">用户名</label>
+</div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.UserName)
+    @Html.ValidationMessageFor(model => model.UserName)
+</div>
+<div class="editor-label">
+    @Html.LabelFor(model => model.AntennaRoleId)
+</div>
+<div class="editor-field">
+    @Html.DropDownListFor(model => model.AntennaRoleId, new SelectList(Common<AntennaRole>.GetList(), "Id", "Name"), String.Empty)
+    @Html.ValidationMessageFor(model => model.AntennaRoleId)
+</div>
