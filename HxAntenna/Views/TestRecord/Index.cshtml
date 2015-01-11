@@ -16,6 +16,7 @@
             @Html.Hidden("returnRoot", (string)ViewBag.ReturnRoot)
             @Html.Hidden("actionAjax", (string)ViewBag.Action)
             @Html.Hidden("filter")
+            @Html.Hidden("export", false)
             <td>
                 @Html.TextBox("TestTime@>=", null, new { @class = "filter Wdate", style = "width: 100px;", onFocus = "WdatePicker(({lang:'zh-cn'}))" })
                 @Html.DropDownList("TestTimeStartHour@>=", new SelectList(@Html.GetHoursList(), "Value", "Text"), String.Empty, new { @class = "filter", style = "width: 50px;" })
@@ -27,7 +28,8 @@
                 @Html.TextBox("SerialNumber.Name@%", null, new { @class = "filter" })
             </td>
             <td>
-                <button type="submit">查询</button>
+                <button id="btSearch" type="submit">查询</button>
+                <button id="btExport" type="submit">导出</button>
             </td>
         </tr>
     </table>
@@ -45,6 +47,23 @@
     <script>
         $(document).ready(function () {
             $("#searchForm").submit(function (e) { setFilter(); });
+            //the export url
+            var exportUrl = "/TestRecord/Get";
+            $("#btExport").click(function () {
+                $("#export").val("True");
+                //remove ajax form submit, because download file cannot use this way
+                $("#searchForm").attr("data-ajax", "false");
+                $("#searchForm").attr("action", exportUrl);
+            });
+            $("#btSearch").click(function () {
+                //normal search, set export to
+                $("#export").val("False");
+                //use ajax from submit, because this is a normal search
+                $("#searchForm").attr("data-ajax", "true");
+                //get current selected kind id attr, and replace form's data-ajax-url with it
+                var currentSelectedKind = $(".selected-kind").attr("Id");
+                $("#searchForm").attr("data-ajax-url", currentSelectedKind);
+            });
         });
     </script>
 }

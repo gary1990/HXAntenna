@@ -25,7 +25,7 @@ namespace HxAntenna.Models
         public string AntennaUserId { get; set; }
         [DisplayName("测试时间")]
         public DateTime TestTimeItem { get; set; }
-        [DisplayName("最新记录")]
+        [DisplayName("最新记录")]//false is not lastest, 0. true is latest, 1.
         public bool IsLatestTest { get; set; }
         [DisplayName("电调")]//false is not ESC, true is NOT ESC
         public bool IsEsc { get; set; }

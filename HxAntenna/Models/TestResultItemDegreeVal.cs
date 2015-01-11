@@ -13,6 +13,7 @@ namespace HxAntenna.Models
         }
         public int Id { get; set; }
         public int TestResultItemDegreeId { get; set; }
+        [DisplayName("标准")]
         public int TestStandardId { get; set; }
         [DisplayName("端口")]
         public int Port { get; set; }

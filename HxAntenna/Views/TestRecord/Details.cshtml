@@ -1,0 +1,62 @@
+﻿@model TestResult
+
+@{
+    ViewBag.Title = "详情";
+}
+
+<h2>@ViewBag.Name:@ViewBag.Title</h2>
+
+@foreach (var testResultItem in Model.TestResultItems.Where(a => a.IsLatestTest == true)) {
+    @testResultItem.TestItem.Name
+    <table>
+        <thead>
+            <tr>
+                <th>测试时间</th>
+                <th>测试员</th>
+                <th>测试结果</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>@testResultItem.TestTimeItem</td>
+                <td>@testResultItem.AntennaUser.JobNumber</td>
+                <td>
+                    @if (testResultItem.ResultItem)
+                    {
+                        <span>合格</span>
+                    }
+                    else 
+                    {
+                        <span>不合格</span>
+                    }
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    foreach (var testResultItemDegree in testResultItem.TestResultItemDegrees) {
+        if (testResultItemDegree.Degree != 360)
+        {
+            @testResultItemDegree.Degree <span>℃</span><br/>
+        }
+        <table>
+            <thead>
+                <tr>
+                    @foreach (var testResultItemDegreeVal in testResultItemDegree.TestResultItemDegreeVals)
+                    {
+                        <th>标准 @Html.SymbolEnumToString(testResultItemDegreeVal.TestStandard.Symbol) @testResultItemDegreeVal.TestStandard.StandardValue</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    @foreach (var testResultItemDegreeVal1 in testResultItemDegree.TestResultItemDegreeVals)
+                    {
+                        <td>@testResultItemDegreeVal1.TestData</td>
+                    }
+                </tr>
+            </tbody>
+        </table>
+        <img src="@Url.Content("~/UploadedFolder/" + testResultItemDegree.Img)" /><br/>
+    }
+}
+

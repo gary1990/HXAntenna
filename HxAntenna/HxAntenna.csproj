@@ -39,11 +39,20 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AutoMapper">
+      <HintPath>..\packages\AutoMapper.3.3.0\lib\net40\AutoMapper.dll</HintPath>
+    </Reference>
+    <Reference Include="AutoMapper.Net4">
+      <HintPath>..\packages\AutoMapper.3.3.0\lib\net40\AutoMapper.Net4.dll</HintPath>
+    </Reference>
     <Reference Include="Ionic.Zip, Version=1.9.1.8, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Ionic.Zip.dll</HintPath>
+      <HintPath>C:\Users\GARY\Desktop\Ionic.Zip.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="NPOI">
+      <HintPath>C:\Users\GARY\Desktop\NPOI.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -168,6 +177,7 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\ApiController.cs" />
     <Compile Include="Controllers\BaseModelController.cs" />
+    <Compile Include="Controllers\Common\CommonController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\QualityManageHomeController.cs" />
     <Compile Include="Controllers\SystemHomeController.cs" />
@@ -198,6 +208,8 @@
     <Compile Include="Models\TestResultItemDegreeVal.cs" />
     <Compile Include="Models\TestStandard.cs" />
     <Compile Include="Models\ViewModels\Msg.cs" />
+    <Compile Include="Models\ViewModels\TestitemStandardPortGoup.cs" />
+    <Compile Include="Models\ViewModels\TestRecordExport.cs" />
     <Compile Include="Models\ViewModels\XmlResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
@@ -325,6 +337,7 @@
     <Content Include="Scripts\respond.min.js" />
     <Content Include="Scripts\someac.js" />
     <Content Include="Scripts\_references.js" />
+    <Content Include="SQLProcedure\p_testrecordexcel_Rp.sql" />
     <Content Include="UploadedFolder\20141130\20141114163230_91000112140710101.zip" />
     <Content Include="UploadedFolder\20141130\20141114163230_91000112140710101\0.csv" />
     <Content Include="UploadedFolder\20141130\20141114163230_91000112140710101\0.jpg" />
@@ -404,11 +417,13 @@
     <Content Include="Views\QualityManageHome\Index.cshtml" />
     <Content Include="Views\TestRecord\Index.cshtml" />
     <Content Include="Views\TestRecord\Get.cshtml" />
+    <Content Include="Views\TestRecord\Details.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="bin\" />
     <Folder Include="Views\Api\" />
+    <Folder Include="Views\Common\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
@@ -445,6 +460,7 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
+  <Import Project="..\packages\AutoMapper.3.3.0\tools\AutoMapper.targets" Condition="Exists('..\packages\AutoMapper.3.3.0\tools\AutoMapper.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

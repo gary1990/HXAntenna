@@ -30,7 +30,7 @@
                     @Html.DisplayFor(modelItem => item.SerialNumber.Name)
                 </td>
                 <td>
-                    @if (!item.Result)
+                    @if (item.Result)
                     {
                         <span style="color:green;">合格</span>
                     }
@@ -42,7 +42,7 @@
                 <td>
                     <div class="groupOperation">
                         @{
-                            using (Html.BeginForm("Details", (string)ViewBag.Controller))
+                            using (Html.BeginForm("Details", (string)ViewBag.Controller, FormMethod.Post, new { target = "_blank"}))
                             {
                                 @Html.AntiForgeryToken()
                                 

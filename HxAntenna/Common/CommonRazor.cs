@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HxAntenna.Models.Constant;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -55,6 +56,29 @@ namespace System.Web.Mvc.Html
                 hours.Add(new SelectListItem { Text = i.ToString(), Value = i.ToString() });
             }
             return hours;
+        }
+
+        public static MvcHtmlString SymbolEnumToString(this HtmlHelper htmlHelper, Symbol symbol) 
+        {
+            string symbolStr = "";
+            switch (symbol)
+            {
+                case Symbol.GreatOrEqual:
+                    symbolStr = ">=";
+                    break;
+                case Symbol.LessOrEqual:
+                    symbolStr = "<=";
+                    break;
+                case Symbol.Great:
+                    symbolStr = ">";
+                    break;
+                case Symbol.Less:
+                    symbolStr = "<";
+                    break;
+                default:
+                    break;
+            }
+            return MvcHtmlString.Create(symbolStr);
         }
     }
 

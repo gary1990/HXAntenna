@@ -16,7 +16,7 @@ namespace HxAntenna.Models
         public int Id { get; set; }
         [DisplayName("序列号")]
         public int SerialNumberId { get; set; }
-        [DisplayName("测试结果")]
+        [DisplayName("测试结果")]//false is fail, 0; true is pass, 1
         public bool Result { get; set; }
         [DisplayName("测试时间")]
         public DateTime TestTime { get; set; }

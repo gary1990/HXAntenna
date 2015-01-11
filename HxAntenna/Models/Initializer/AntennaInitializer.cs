@@ -9,7 +9,7 @@ using System.Web;
 
 namespace HxAntenna.Models.Initializer
 {
-    public class AntennaInitializer : DropCreateDatabaseIfModelChanges<AntennaDbContext>
+    public class AntennaInitializer : CreateDatabaseIfNotExists<AntennaDbContext>
     {
         protected override void Seed(AntennaDbContext db)
         {
