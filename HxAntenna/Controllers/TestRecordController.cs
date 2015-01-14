@@ -196,7 +196,7 @@ namespace HxAntenna.Controllers
                                 .SingleOrDefault();
                             string testDate = testRecordExport.TestTime.ToString();
                             string serialNumber = testRecordExport.SerialNumber;
-                            string degree = testRecordExport.Degree + "℃";
+                            string degree = testRecordExport.Degree + "度";
                             //new serrialNumberDegreeGroup, store distinct(SerialNumber + Degree)
                             string serialNumberDegreeGroup = testRecordExport.SerialNumber + testRecordExport.Degree;
                             //if not contains in serialNumberDegreeGroupList
