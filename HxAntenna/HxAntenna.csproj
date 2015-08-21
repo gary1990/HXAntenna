@@ -315,6 +315,7 @@
     <Content Include="Scripts\bootstrap.min.js" />
     <None Include="Properties\PublishProfiles\10.10.1.240.pubxml" />
     <None Include="Properties\PublishProfiles\114.215.196.3.pubxml" />
+    <None Include="Properties\PublishProfiles\manual.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\custom.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
