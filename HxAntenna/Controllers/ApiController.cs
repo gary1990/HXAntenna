@@ -539,7 +539,7 @@ namespace HxAntenna.Controllers
                                     {
                                         resultItemSw = resultItemSw && testResultItemDegree.ResultItemDegree;
                                     }
-                                    if (testResultItemDegree.TestResultItemId == testResultItemSwAdd.Id)
+                                    if (testResultItemDegree.TestResultItemId == testResultItemSegAdd.Id)
                                     {
                                         resultItemSeg = resultItemSeg && testResultItemDegree.ResultItemDegree;
                                     }
