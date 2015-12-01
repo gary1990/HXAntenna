@@ -80,6 +80,23 @@ namespace System.Web.Mvc.Html
             }
             return MvcHtmlString.Create(symbolStr);
         }
+
+        public static string GetMeasStr(this HtmlHelper htmlHelper, TestMeans testMeas)
+        {
+            var testMeasStr = "";
+            switch (testMeas)
+            {
+                case TestMeans.Sweep:
+                    testMeasStr = "SWEEP";
+                    break;
+                case TestMeans.Single:
+                    testMeasStr = "SINGLE";
+                    break;
+                default:
+                    break;
+            }
+            return testMeasStr;
+        }
     }
 
     public static class AuthorizeActionLinkExtention 

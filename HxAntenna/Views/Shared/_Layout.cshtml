@@ -58,7 +58,8 @@
                 {
                     <li class="current">@Html.AuthorizeActionLink("质量管理", "Index", "QualityManageHome")
                         <ul class="sideMenu">
-                            <li class="@(sideMenuPath == "测试记录" ? "current" : "")">@Html.AuthorizeActionLink("测试记录", "Index", "TestRecord")</li>
+                            <li class="@(sideMenuPath == "VNA测试记录" ? "current" : "")">@Html.AuthorizeActionLink("VNA测试记录", "Index", "TestRecord")</li>
+                            <li class="@(sideMenuPath == "PIM测试记录" ? "current" : "")">@Html.AuthorizeActionLink("PIM测试记录", "Index", "TestResultPim")</li>
                         </ul>
                     </li>
                 }

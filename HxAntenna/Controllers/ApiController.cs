@@ -14,6 +14,9 @@ using System.Transactions;
 using System.IO;
 using System.Globalization;
 using HxAntenna.Models.Constant;
+using HxAntenna.Lib;
+using NPOI.HSSF.UserModel;
+using NPOI.SS.UserModel;
 
 namespace HxAntenna.Controllers
 {
@@ -862,6 +865,503 @@ namespace HxAntenna.Controllers
             }
             
             return new XmlResult<SingleResultXml>() { Data = result }; 
+        }
+
+        public ActionResult UploadPimFileRonsenberger()
+        {
+            SingleResultXml result = new SingleResultXml() { Message = "true" };
+            HttpPostedFileBase file = Request.Files["file"];
+            string fileFullName;
+            string fileEx;
+            string fileNameWithoutEx;
+            string slash = "/";
+            string uploadTime = DateTime.Now.ToString("yyyyMMdd");
+            string uploadPath = AppDomain.CurrentDomain.BaseDirectory + "/UploadedFolder/PIM/Ronsenberger/" + uploadTime;
+            string savePath;
+            string saveFolderPath;
+
+            if (file == null || file.ContentLength <= 0)
+            {
+                result.Message = "file can not be null";
+                return new XmlResult<SingleResultXml>() { Data = result };
+            }
+
+            fileFullName = System.IO.Path.GetFileName(file.FileName);
+            fileEx = System.IO.Path.GetExtension(fileFullName);
+            fileNameWithoutEx = System.IO.Path.GetFileNameWithoutExtension(fileFullName);
+            if (fileEx.ToLower() != ".zip")
+            {
+                result.Message = "incorrect file type";
+                return new XmlResult<SingleResultXml>() { Data = result };
+            }
+            if (!System.IO.Directory.Exists(uploadPath))
+            {
+                try
+                {
+                    System.IO.Directory.CreateDirectory(uploadPath);
+                }
+                catch (Exception /*e*/)
+                {
+                    result.Message = "can not create upalod directory";
+                    return new XmlResult<SingleResultXml>() { Data = result };
+                }
+            }
+            savePath = System.IO.Path.Combine(uploadPath, fileFullName);
+            try
+            {
+                file.SaveAs(savePath);
+            }
+            catch (Exception /*e*/)
+            {
+                result.Message = "can not save uploaded file";
+                return new XmlResult<SingleResultXml>() { Data = result };
+            }
+
+            ZipFile zip = ZipFile.Read(savePath, new ReadOptions { Encoding = Encoding.Default });
+            try
+            {
+                //unzip file
+                zip.AlternateEncoding = Encoding.Default;
+                zip.ExtractAll(uploadPath + slash + fileNameWithoutEx, ExtractExistingFileAction.OverwriteSilently);
+            }
+            catch (Exception /*e*/)
+            {
+                result.Message = "can not unzip file";
+                zip.Dispose();
+                return new XmlResult<SingleResultXml>() { Data = result };
+            }
+            zip.Dispose();
+
+            using (var scope = new TransactionScope())
+            {
+                saveFolderPath = uploadPath + slash + fileNameWithoutEx;
+                //read xls File
+                string serialNumber = "";
+                string testImage = "";
+                string excelFilePath = "";
+                string txtFilePath = "";
+                string pdfFilePath = "";
+                string[] xlsFiles = Directory.GetFiles(saveFolderPath, "*.xls");
+                if (xlsFiles.Count() != 1)
+                {
+                    result.Message = "The number of excel incorrect";
+                    return new XmlResult<SingleResultXml>() { Data = result };
+                }
+                else
+                {
+                    //get serial number, excel file without extension
+                    serialNumber = System.IO.Path.GetFileNameWithoutExtension(xlsFiles[0]);
+                    excelFilePath = saveFolderPath + slash + serialNumber + ".xls";
+                    txtFilePath = saveFolderPath + slash + serialNumber + ".txt";
+                    pdfFilePath = saveFolderPath + slash + serialNumber + ".pdf";
+                }
+                if (!System.IO.File.Exists(pdfFilePath))
+                {
+                    result.Message = "can not find " + serialNumber + ".pdf file";
+                    return new XmlResult<SingleResultXml>() { Data = result };
+                }
+                if (!System.IO.File.Exists(txtFilePath))
+                {
+                    result.Message = "can not find " + serialNumber + ".txt file";
+                    return new XmlResult<SingleResultXml>() { Data = result };
+                }
+
+                try
+                {
+                    PdfHandler.ExtractImagesFromPDF(pdfFilePath, saveFolderPath);
+                    testImage = "/Ronsenberger/" + uploadTime + slash + fileNameWithoutEx + slash + "result.jpg";
+                }
+                catch (Exception /*e*/)
+                {
+                    result.Message = "can not generate image from " + serialNumber + ".pdf file";
+                    return new XmlResult<SingleResultXml>() { Data = result };
+                }
+
+                //get TestResultPim records in DB
+                var testResultPimDbs = unitOfWork.TestResultPimRepository.Get(a => a.SerialNumber == serialNumber).ToList();
+                if (testResultPimDbs.Count != 0)
+                {
+                    foreach (var testResultPimDb in testResultPimDbs)
+                    {
+                        try
+                        {
+                            testResultPimDb.IsLatest = false;
+                            unitOfWork.DbSaveChanges();
+                        }
+                        catch (Exception /*e*/)
+                        {
+                            result.Message = "update TestResultPim Old record failed";
+                            return new XmlResult<SingleResultXml>() { Data = result };
+                        }
+                    }
+                }
+                //initialize new TestResultPim
+                TestResultPim testResultPim = new TestResultPim();
+                testResultPim.SerialNumber = serialNumber;
+                testResultPim.TestImage = testImage;
+
+                //read txt file
+                StreamReader srTxt = new StreamReader(txtFilePath);
+                string txtLine = string.Empty;
+                string[] txtLineArr = null;
+                int txtLineNumber = 0;
+                while (txtLineNumber < 25)//maxLineNumber = 25
+                {
+                    txtLine = srTxt.ReadLine();
+                    txtLineNumber++;
+                    if (txtLineNumber <= 2)//first two line, TestResultPim.Carrier
+                    {
+                        txtLineArr = txtLine.Trim().Split(' ');
+                        //SetFreq
+                        string setFreqStr = txtLineArr[1];
+                        decimal setFreq;
+                        if (!Decimal.TryParse(setFreqStr, out setFreq))
+                        {
+                            srTxt.Close();
+                            result.Message = "line " + txtLineNumber + " SetFreq: " + setFreqStr + " parse failed";
+                            return new XmlResult<SingleResultXml>()
+                            {
+                                Data = result
+                            };
+                        }
+                        //StartFreq
+                        string startFreqStr = txtLineArr[4];
+                        decimal startFreq;
+                        if (!Decimal.TryParse(startFreqStr, out startFreq))
+                        {
+                            srTxt.Close();
+                            result.Message = "line " + txtLineNumber + " StartFreq: " + startFreqStr + " parse failed";
+                            return new XmlResult<SingleResultXml>()
+                            {
+                                Data = result
+                            };
+                        }
+                        //StopFreq
+                        string stopFreqStr = txtLineArr[7];
+                        decimal stopFreq;
+                        if (!Decimal.TryParse(stopFreqStr, out stopFreq))
+                        {
+                            srTxt.Close();
+                            result.Message = "line " + txtLineNumber + " StopFreq: " + stopFreqStr + " parse failed";
+                            return new XmlResult<SingleResultXml>()
+                            {
+                                Data = result
+                            };
+                        }
+                        //Freq unit
+                        string freqUnitStr = txtLineArr[2];
+                        Unit freqUnit;
+                        if (freqUnitStr.ToUpper() == "MHZ")
+                        {
+                            freqUnit = Unit.M;
+                        }
+                        else
+                        {
+                            srTxt.Close();
+                            result.Message = "line " + txtLineNumber + " Freq unit: " + freqUnitStr + " parse failed";
+                            return new XmlResult<SingleResultXml>()
+                            {
+                                Data = result
+                            };
+                        }
+                        //Power
+                        string powerStr = txtLineArr[10];
+                        decimal power;
+                        if (!Decimal.TryParse(powerStr, out power))
+                        {
+                            srTxt.Close();
+                            result.Message = "line " + txtLineNumber + " Power: " + powerStr + " parse failed";
+                            return new XmlResult<SingleResultXml>()
+                            {
+                                Data = result
+                            };
+                        }
+                        //Power Unit
+                        string imUnitStr = txtLineArr[11];
+                        ImUnit imUnit;
+                        if (imUnitStr.ToUpper() == "DBC")
+                        {
+                            imUnit = ImUnit.dBc;
+                        }
+                        else if (imUnitStr.ToUpper() == "DBM")
+                        {
+                            imUnit = ImUnit.dBm;
+                        }
+                        else
+                        {
+                            srTxt.Close();
+                            result.Message = "line " + txtLineNumber + " Power unit: " + imUnitStr + " parse failed";
+                            return new XmlResult<SingleResultXml>()
+                            {
+                                Data = result
+                            };
+                        }
+                        Carrier carrier = new Carrier()
+                        {
+                            SetFreq = setFreq,
+                            StartFreq = startFreq,
+                            StopFreq = stopFreq,
+                            Power = power,
+                            FreqUnit = freqUnit,
+                            ImUnit = imUnit
+                        };
+                        var carrierDb = unitOfWork.CarrierRepository.Get(a => a.SetFreq == setFreq && a.StartFreq == startFreq && a.StopFreq == stopFreq && a.Power == power && a.FreqUnit == freqUnit && a.ImUnit == imUnit).SingleOrDefault();
+                        if (carrierDb == null)
+                        {
+                            try
+                            {
+                                unitOfWork.CarrierRepository.Insert(carrier);
+                                unitOfWork.DbSaveChanges();
+                                testResultPim.Carriers.Add(carrier);
+                            }
+                            catch (Exception /*e*/)
+                            {
+                                srTxt.Close();
+                                result.Message = "insert Carrier failed";
+                                return new XmlResult<SingleResultXml>()
+                                {
+                                    Data = result
+                                };
+                            }
+                        }
+                        else
+                        {
+                            testResultPim.Carriers.Add(carrierDb);
+                        }
+                    }
+                    else if (txtLineNumber == 3)//ImOrder, TestResultPim.TestMeas in line 3
+                    {
+                        txtLineArr = txtLine.Trim().Split(' ');
+                        //ImOrder.OrderNumber
+                        string orderNumberStr = txtLineArr[1];
+                        int orderNumber;
+                        if (!int.TryParse(orderNumberStr.Substring(orderNumberStr.Length - 1), out orderNumber))
+                        {
+                            srTxt.Close();
+                            result.Message = "line " + txtLineNumber + " " + orderNumberStr + " parse failed";
+                            return new XmlResult<SingleResultXml>() { Data = result };
+                        }
+                        //ImOrder.ImUnit
+                        string imUnitStr = txtLineArr[3];
+                        ImUnit imUnit;
+                        if (imUnitStr.ToUpper() == "DBC")
+                        {
+                            imUnit = ImUnit.dBc;
+                        }
+                        else if (imUnitStr.ToUpper() == "DBM")
+                        {
+                            imUnit = ImUnit.dBm;
+                        }
+                        else
+                        {
+                            srTxt.Close();
+                            result.Message = "line " + txtLineNumber + " Power unit: " + imUnitStr + " parse failed";
+                            return new XmlResult<SingleResultXml>()
+                            {
+                                Data = result
+                            };
+                        }
+                        //set TestResultPim.TestMeans
+                        string testMeansStr = txtLineArr[4];
+                        TestMeans testMeans;
+                        if (testMeansStr.ToUpper() == "SWEEP")
+                        {
+                            testMeans = TestMeans.Sweep;
+                        }
+                        else if (testMeansStr.ToUpper() == "SINGLE")
+                        {
+                            testMeans = TestMeans.Single;
+                        }
+                        else
+                        {
+                            srTxt.Close();
+                            result.Message = "line " + txtLineNumber + "  Meas: " + testMeansStr + " parse failed";
+                            return new XmlResult<SingleResultXml>()
+                            {
+                                Data = result
+                            };
+                        }
+                        //set TestResultPim.TestMeans
+                        testResultPim.TestMeans = testMeans;
+                        //set TestResultPim.ImOrderId
+                        ImOrder imOrder = new ImOrder() { OrderNumber = orderNumber, ImUnit = imUnit };
+                        //get ImOrder from db
+                        var imOrderDb = unitOfWork.ImOrderRepository.Get(a => a.OrderNumber == orderNumber && a.ImUnit == imUnit).SingleOrDefault();
+                        if (imOrderDb == null)
+                        {
+                            try
+                            {
+                                unitOfWork.ImOrderRepository.Insert(imOrder);
+                                unitOfWork.DbSaveChanges();
+                                testResultPim.ImOrderId = imOrder.Id;
+                            }
+                            catch (Exception /*e*/)
+                            {
+                                srTxt.Close();
+                                result.Message = "line " + txtLineNumber + ", Insert IMOrder failed";
+                                return new XmlResult<SingleResultXml>()
+                                {
+                                    Data = result
+                                };
+                            }
+                        }
+                        else
+                        {
+                            testResultPim.ImOrderId = imOrderDb.Id;
+                        }
+                    }
+                    else if (txtLineNumber == 4)//TestEquipment in line 4
+                    {
+                        txtLineArr = txtLine.Trim().Split(' ');
+                        string name = txtLineArr[2];
+                        string serailNumber = txtLineArr[txtLineArr.Count() - 1];
+                        //set TestResultPim.TestEquipmentId
+                        TestEquipment testEquipment = new TestEquipment() { Name = name.Substring(0, name.Length - 1), SerialNumber = serailNumber, isVna = false, IsDelete = false };
+                        var testEquipmentDb = unitOfWork.TestEquipmentRepository.Get(a => a.Name == name.Substring(0, name.Length - 1) && a.SerialNumber == serailNumber).FirstOrDefault();
+                        if (testEquipmentDb == null)
+                        {
+                            try
+                            {
+                                unitOfWork.TestEquipmentRepository.Insert(testEquipment);
+                                unitOfWork.DbSaveChanges();
+                                testResultPim.TestEquipmentId = testEquipment.Id;
+                            }
+                            catch (Exception /*e*/)
+                            {
+                                srTxt.Close();
+                                result.Message = "line " + txtLineNumber + ", Insert TestEquipment failed";
+                                return new XmlResult<SingleResultXml>() { Data = result };
+                            }
+                        }
+                        else
+                        {
+                            testResultPim.TestEquipmentId = testEquipmentDb.Id;
+                        }
+                    }
+                    else if (txtLineNumber == 5)//TestTime in line 5
+                    {
+                        string testTimeStr = txtLine.Trim().Replace(":", "") + DateTime.Now.ToString("ss");//add ss to Test Time string 
+                        DateTime testTime;
+                        if (!DateTime.TryParseExact(testTimeStr, "yyyyMMdd HHmmss", CultureInfo.InvariantCulture, DateTimeStyles.None, out testTime))
+                        {
+                            srTxt.Close();
+                            result.Message = "line " + txtLineNumber + " Test Time : " + testTimeStr + " parse failed";
+                            return new XmlResult<SingleResultXml>() { Data = result };
+                        }
+                        //set TestResultPim.TestTime
+                        testResultPim.TestTime = testTime;
+                    }
+                    else if (txtLineNumber == 23)//TestResultPim.LimitLine
+                    {
+                        txtLineArr = txtLine.Trim().Split(' ');
+                        string limitLineStr = txtLineArr[txtLineArr.Count() - 1];
+                        decimal limitLine;
+                        if (!Decimal.TryParse(limitLineStr, out limitLine))
+                        {
+                            srTxt.Close();
+                            result.Message = "line " + txtLineNumber + " Limitline: " + limitLineStr + " parse failed";
+                            return new XmlResult<SingleResultXml>() { Data = result };
+                        }
+                        //set TestResultPim.LimitLine
+                        testResultPim.LimitLine = limitLine;
+                    }
+                    else
+                    {
+                        //other line, useless ignore
+                    }
+                }
+                //close txt file
+                srTxt.Close();
+
+                //read excel file
+                HSSFWorkbook workbook = new HSSFWorkbook();
+                using (FileStream fsExcelFile = new FileStream(excelFilePath, FileMode.Open, FileAccess.Read))
+                {
+                    workbook = new HSSFWorkbook(fsExcelFile);
+                }
+                ISheet sheet = workbook.GetSheetAt(0);
+                List<TestResultPimPoint> testResultPimPoints = new List<TestResultPimPoint> { };
+                for (int row = 0; row <= sheet.LastRowNum; row++)
+                {
+                    if (row == 0)
+                    {
+                        //skip line 1, title line
+                    }
+                    else
+                    {
+                        if (sheet.GetRow(row) != null)
+                        {
+                            string carrierOneFreqStr = sheet.GetRow(row).GetCell(0).StringCellValue;
+                            decimal carrierOneFreq;
+                            if (!Decimal.TryParse(carrierOneFreqStr, out carrierOneFreq))
+                            {
+                                result.Message = "excel line " + (row + 1) + " Carrier 1 Freq " + carrierOneFreqStr + " parse failed";
+                                return new XmlResult<SingleResultXml>() { Data = result };
+                            }
+                            string carrierTwoFreqStr = sheet.GetRow(row).GetCell(1).StringCellValue;
+                            decimal carrierTwoFreq;
+                            if (!Decimal.TryParse(carrierTwoFreqStr, out carrierTwoFreq))
+                            {
+                                result.Message = "excel line " + (row + 1) + " Carrier 2 Freq " + carrierOneFreqStr + " parse failed";
+                                return new XmlResult<SingleResultXml>() { Data = result };
+                            }
+                            string imFreqStr = sheet.GetRow(row).GetCell(6).StringCellValue;
+                            decimal imFreq;
+                            if (!Decimal.TryParse(imFreqStr, out imFreq))
+                            {
+                                result.Message = "excel line " + (row + 1) + " IM Freq " + imFreqStr + " parse failed";
+                                return new XmlResult<SingleResultXml>() { Data = result };
+                            }
+                            string imPowerStr = sheet.GetRow(row).GetCell(7).StringCellValue;
+                            decimal imPower;
+                            if (!Decimal.TryParse(imPowerStr, out imPower))
+                            {
+                                result.Message = "excel line " + (row + 1) + " IM Power " + imFreqStr + " parse failed";
+                                return new XmlResult<SingleResultXml>()
+                                {
+                                    Data = result
+                                };
+                            }
+                            TestResultPimPoint testResultPimPoint = new TestResultPimPoint
+                            {
+                                CarrierOneFreq = carrierOneFreq,
+                                CarrierTwoFreq = carrierTwoFreq,
+                                ImFreq = imFreq,
+                                ImPower = imPower
+                            };
+                            testResultPimPoints.Add(testResultPimPoint);
+                        }
+                    }
+                }
+
+                var maxImPower = testResultPimPoints.Max(a => a.ImPower);
+                var maxImPowerPoint = testResultPimPoints.Where(a => a.ImPower == maxImPower).First();
+                maxImPowerPoint.isWorst = true;
+                //set TestResultPim.TestResultPimPoints
+                testResultPim.TestResultPimPoints = testResultPimPoints;
+                //set TestResultPim.TestResult
+                if (maxImPower < testResultPim.LimitLine)
+                {
+                    testResultPim.TestResult = true;
+                }
+
+                try
+                {
+                    unitOfWork.TestResultPimRepository.Insert(testResultPim);
+                    unitOfWork.DbSaveChanges();
+                }
+                catch (Exception /*e*/)
+                {
+                    result.Message = "Insert TestResultPim failed";
+                    return new XmlResult<SingleResultXml>()
+                    {
+                        Data = result
+                    };
+                }
+                scope.Complete();
+            }
+
+            return new XmlResult<SingleResultXml>() { Data = result };
         }
 	}
 }

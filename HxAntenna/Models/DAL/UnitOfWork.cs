@@ -21,6 +21,12 @@ namespace HxAntenna.Models.DAL
         private GenericRepository<TestResultItemDegree> testResultItemDegreeRepository;
         private GenericRepository<TestResultItemDegreeVal> testResultItemDegreeValRepository;
 
+        private GenericRepository<TestResultPim> testResultPimRepository;
+        private GenericRepository<TestEquipment> testEquipmentRepository;
+        private GenericRepository<ImOrder> imOrderRepository;
+        private GenericRepository<Carrier> carrierRepository;
+        private GenericRepository<TestResultPimPoint> testResultPimPointRepository;
+
         public GenericRepository<AntennaUser> AntennaUserRepository 
         {
             get 
@@ -138,6 +144,66 @@ namespace HxAntenna.Models.DAL
                     this.testResultItemDegreeValRepository = new GenericRepository<TestResultItemDegreeVal>(context);
                 }
                 return testResultItemDegreeValRepository;
+            }
+        }
+
+        public GenericRepository<TestResultPim> TestResultPimRepository
+        {
+            get
+            {
+                if (this.testResultPimRepository == null)
+                {
+                    this.testResultPimRepository = new GenericRepository<TestResultPim>(context);
+                }
+                return testResultPimRepository;
+            }
+        }
+
+        public GenericRepository<TestEquipment> TestEquipmentRepository
+        {
+            get
+            {
+                if (this.testEquipmentRepository == null)
+                {
+                    this.testEquipmentRepository = new GenericRepository<TestEquipment>(context);
+                }
+                return testEquipmentRepository;
+            }
+        }
+
+        public GenericRepository<ImOrder> ImOrderRepository
+        {
+            get
+            {
+                if (this.imOrderRepository == null)
+                {
+                    this.imOrderRepository = new GenericRepository<ImOrder>(context);
+                }
+                return imOrderRepository;
+            }
+        }
+
+        public GenericRepository<Carrier> CarrierRepository
+        {
+            get
+            {
+                if (this.carrierRepository == null)
+                {
+                    this.carrierRepository = new GenericRepository<Carrier>(context);
+                }
+                return carrierRepository;
+            }
+        }
+
+        public GenericRepository<TestResultPimPoint> TestResultPimPointRepository
+        {
+            get
+            {
+                if (this.testResultPimPointRepository == null)
+                {
+                    this.testResultPimPointRepository = new GenericRepository<TestResultPimPoint>(context);
+                }
+                return testResultPimPointRepository;
             }
         }
 

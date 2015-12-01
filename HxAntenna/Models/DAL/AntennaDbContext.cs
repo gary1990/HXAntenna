@@ -29,6 +29,12 @@ namespace HxAntenna.Models.DAL
         public DbSet<TestResultItemDegree> TestResultItemDegree { get; set; }
         public DbSet<TestResultItemDegreeVal> TestResultItemDegreeVal { get; set; }
 
+        public DbSet<TestResultPim> TestResultPim { get; set; }
+        public DbSet<TestEquipment> TestEquipment { get; set; }
+        public DbSet<ImOrder> ImOrder { get; set; }
+        public DbSet<Carrier> Carrier { get; set; }
+        public DbSet<TestResultPimPoint> TestResultPimPoint { get; set; }
+
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -47,6 +53,17 @@ namespace HxAntenna.Models.DAL
             modelBuilder.Entity<TestResultItemDegreeVal>().Property(a => a.TestData).HasPrecision(8,2);
             modelBuilder.Entity<TestResult>().Property(a => a.TestTime).HasColumnType("datetime2").HasPrecision(0);
             modelBuilder.Entity<TestResultItem>().Property(a => a.TestTimeItem).HasColumnType("datetime2").HasPrecision(0);
+
+            modelBuilder.Entity<TestResultPim>().Property(a => a.TestTime).HasColumnType("datetime2").HasPrecision(0);
+            modelBuilder.Entity<TestResultPim>().Property(a => a.LimitLine).HasPrecision(8, 2);
+            modelBuilder.Entity<Carrier>().Property(a => a.SetFreq).HasPrecision(8, 2);
+            modelBuilder.Entity<Carrier>().Property(a => a.StartFreq).HasPrecision(8, 2);
+            modelBuilder.Entity<Carrier>().Property(a => a.StopFreq).HasPrecision(8, 2);
+            modelBuilder.Entity<Carrier>().Property(a => a.Power).HasPrecision(8, 2);
+            modelBuilder.Entity<TestResultPimPoint>().Property(a => a.CarrierOneFreq).HasPrecision(8, 2);
+            modelBuilder.Entity<TestResultPimPoint>().Property(a => a.CarrierTwoFreq).HasPrecision(8, 2);
+            modelBuilder.Entity<TestResultPimPoint>().Property(a => a.ImFreq).HasPrecision(8, 2);
+            modelBuilder.Entity<TestResultPimPoint>().Property(a => a.ImPower).HasPrecision(8, 2);
         }
     }
 }

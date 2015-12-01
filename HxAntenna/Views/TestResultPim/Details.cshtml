@@ -1,0 +1,133 @@
+﻿@model TestResultPim
+
+@{
+    ViewBag.Title = "详情";
+}
+<h2>@ViewBag.Name:@ViewBag.Title</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.TestTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SerialNumber)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AntennaUserId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TestEquipmentId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ImOrderId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TestMeans)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TestResult)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LimitLine)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                @Html.DisplayFor(model => model.TestTime)
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.SerialNumber)
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.AntennaUser.UserName)
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.TestEquipment.Name)
+            </td>
+            <td>
+                IM @Html.DisplayFor(model => model.ImOrder.OrderNumber)
+            </td>
+            <td>
+                @Html.GetMeasStr(Model.TestMeans)
+            </td>
+            <td>
+                @{
+                    if (Model.TestResult)
+                    {
+                        <span>合格</span>
+                    }
+                    else
+                    {
+                        <span>不合格</span>
+                    }
+                }
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.LimitLine)
+            </td>
+        </tr>
+    </tbody>
+</table>
+<table>
+    <thead>
+        <tr>
+            <th>固定频率</th>
+            <th>起始频率</th>
+            <th>终止频率</th>
+            <th>输出功率</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var itemCarrier in Model.Carriers)
+        {
+            <tr>
+                <td>@itemCarrier.SetFreq</td>
+                <td>@itemCarrier.StartFreq</td>
+                <td>@itemCarrier.StopFreq</td>
+                <td>@itemCarrier.Power</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<table>
+    <thead>
+        <tr>
+            <th>Carrier 1</th>
+            <th>Carrier 2</th>
+            <th>IM Freq</th>
+            <th>IM Power</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var itemPoint in Model.TestResultPimPoints)
+        {
+            if (itemPoint.isWorst)
+            {
+                <tr>
+                    <td><span style="color:red;">@itemPoint.CarrierOneFreq</span></td>
+                    <td><span style="color:red;">@itemPoint.CarrierTwoFreq</span></td>
+                    <td><span style="color:red;">@itemPoint.ImFreq</span></td>
+                    <td><span style="color:red;">@itemPoint.ImPower</span></td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <td>@itemPoint.CarrierOneFreq</td>
+                    <td>@itemPoint.CarrierTwoFreq</td>
+                    <td>@itemPoint.ImFreq</td>
+                    <td>@itemPoint.ImPower</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+<img src="@Url.Content("~/UploadedFolder/PIM/" + Model.TestImage)" />
+<p>
+    <a href="@Url.Content((string)ViewBag.ReturnUrl)">返回</a>
+</p>
+
