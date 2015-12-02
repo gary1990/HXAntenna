@@ -26,6 +26,7 @@ namespace HxAntenna.Models.DAL
         private GenericRepository<ImOrder> imOrderRepository;
         private GenericRepository<Carrier> carrierRepository;
         private GenericRepository<TestResultPimPoint> testResultPimPointRepository;
+        private GenericRepository<TestImage> testImageRepository;
 
         public GenericRepository<AntennaUser> AntennaUserRepository 
         {
@@ -204,6 +205,18 @@ namespace HxAntenna.Models.DAL
                     this.testResultPimPointRepository = new GenericRepository<TestResultPimPoint>(context);
                 }
                 return testResultPimPointRepository;
+            }
+        }
+
+        public GenericRepository<TestImage> TestImageRepository
+        {
+            get
+            {
+                if (this.testImageRepository == null)
+                {
+                    this.testImageRepository = new GenericRepository<TestImage>(context);
+                }
+                return testImageRepository;
             }
         }
 

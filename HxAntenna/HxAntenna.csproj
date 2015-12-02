@@ -58,6 +58,12 @@
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="Spire.License">
+      <HintPath>..\packages\FreeSpire.PDF.3.2\lib\net40\Spire.License.dll</HintPath>
+    </Reference>
+    <Reference Include="Spire.Pdf">
+      <HintPath>..\packages\FreeSpire.PDF.3.2\lib\net40\Spire.Pdf.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -205,9 +211,9 @@
     <Compile Include="Migrations\201501120951198_InitialCreate.Designer.cs">
       <DependentUpon>201501120951198_InitialCreate.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201512011717271_add_models_for_pim.cs" />
-    <Compile Include="Migrations\201512011717271_add_models_for_pim.Designer.cs">
-      <DependentUpon>201512011717271_add_models_for_pim.cs</DependentUpon>
+    <Compile Include="Migrations\201512021817185_add_models_for_pim.cs" />
+    <Compile Include="Migrations\201512021817185_add_models_for_pim.Designer.cs">
+      <DependentUpon>201512021817185_add_models_for_pim.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
@@ -224,6 +230,7 @@
     <Compile Include="Models\AntennaRole.cs" />
     <Compile Include="Models\SerialNumber.cs" />
     <Compile Include="Models\TestEquipment.cs" />
+    <Compile Include="Models\TestImage.cs" />
     <Compile Include="Models\TestItem.cs" />
     <Compile Include="Models\TestResultItem.cs" />
     <Compile Include="Models\TestResult.cs" />
@@ -431,8 +438,8 @@
     <EmbeddedResource Include="Migrations\201501120951198_InitialCreate.resx">
       <DependentUpon>201501120951198_InitialCreate.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201512011717271_add_models_for_pim.resx">
-      <DependentUpon>201512011717271_add_models_for_pim.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201512021817185_add_models_for_pim.resx">
+      <DependentUpon>201512021817185_add_models_for_pim.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

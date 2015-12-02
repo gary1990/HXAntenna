@@ -34,6 +34,7 @@ namespace HxAntenna.Models.DAL
         public DbSet<ImOrder> ImOrder { get; set; }
         public DbSet<Carrier> Carrier { get; set; }
         public DbSet<TestResultPimPoint> TestResultPimPoint { get; set; }
+        public DbSet<TestImage> TestImage { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

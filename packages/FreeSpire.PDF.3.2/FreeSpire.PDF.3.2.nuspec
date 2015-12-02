@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>FreeSpire.PDF</id>
+    <version>3.2</version>
+    <title>Free Spire.PDF for .NET</title>
+    <authors>Administrator</authors>
+    <owners>Administrator</owners>
+    <projectUrl>http://www.e-iceblue.com/Introduce/free-pdf-component.html</projectUrl>
+    <iconUrl>http://www.e-iceblue.com/images/product_logo/product_buy/pdfnetfree.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>As a standalone PDF component, Free Spire.PDF for .NET enables developers to create, write, edit, convert, print, handle and read PDF files on any .NET applications. You can implement rich capabilities to create PDF files from scratch or process existing PDF documents. Many rich features can be supported, such as security setting, PDF text/attachment/image extract, PDF merge/split, metadata update, section and paragraph optimizing, graph/image drawing and inserting, table creation and processing, and importing data etc.
+Main Functions
+Only Free Spire.PDF, No Adobe Acrobat installed.
+Free Spire.PDF for .NET is a totally independent .NET PDF library. It Does NOT require Adobe Acrobat or any other 3rd party software/library installed on system.
+High Quality PDF File Conversion
+• Convert Webpage HTML, HTML ASPX to PDF
+• Convert Image(Jpeg, Jpg, Png, Bmp, Tiff, Gif, EMF, Ico) to PDF
+• Convert Text to PDF
+• Convert RTF to PDF
+• Convert PDF to Image
+
+Easily Manipulate document and Form fields
+• Merge/split PDF documents
+• Overlay documents.
+• Import and stamp feature
+• Booklet feature
+• Create and fill form field
+Security features
+• Protect PDF documents by setting passwords and digital signature.
+• Decrypt PDF Document
+• Get and Verify Digital Signature
+• Modify PDF Passwords
+Document Settings features
+• Set custom metadata, document properties, page orientation, and page size. 
+• Set PDF position, title display, resize, page mode and print scaling etc.
+Other Features
+• PDF/A-1b and PDF/x1a:2001 Compliance, both standards can be applied.
+• Extract images, text, pages and attachments from a PDF document
+• Pen and brush to draw shape elements, text, images into PDF documents.
+• Layers, transparent graphics, color space and barcode creation can render to PDF documents.
+• Add scalar/vector images and mask and place them in designated location.
+• Table and table style can be supported by Free Spire.PDF for .NET.
+• Insert interactive elements inc</description>
+    <summary>A free PDF component which enables developers to create, write, edit, convert, print, handle and read PDF files on any .NET applications.</summary>
+    <releaseNotes>Free Spire.PDF 3.2
+
+Add new feature to get the form field of PDF.
+Remove the evaluation warning message of the images which get from PDF.</releaseNotes>
+    <copyright>Copyright © 2015 e-iceblue. All Rights Reserved.</copyright>
+    <language>en-US</language>
+    <tags>Controls &amp; Libraries Component PDF VB.NET C# Free Controls PDF/A PDF/A-1b PDF/x1a to XPS Image HTML PDF draw image text</tags>
+  </metadata>
+</package>

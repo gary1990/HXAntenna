@@ -37,13 +37,12 @@ namespace HxAntenna.Models
         public string TestDescription { get; set; }
         [DisplayName("测试结果")]
         public bool TestResult { get; set; }
-        [DisplayName("测试图像")]
-        public string TestImage { get; set; }
         public bool IsLatest { get; set; }
         [DisplayName("极限值")]
         public decimal LimitLine { get; set; }
 
         public virtual ICollection<Carrier> Carriers { get; set; }
         public virtual ICollection<TestResultPimPoint> TestResultPimPoints { get; set; }
+        public virtual ICollection<TestImage> TestImages { get; set; }
     }
 }

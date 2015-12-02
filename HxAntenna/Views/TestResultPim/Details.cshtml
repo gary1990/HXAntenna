@@ -130,7 +130,13 @@
         }
     </tbody>
 </table>
-<img src="@Url.Content("~/UploadedFolder/PIM/" + Model.TestImage)" />
+@if (Model.TestImages.Count != 0)
+{
+    foreach(var image in Model.TestImages) {
+        <img src="@Url.Content("~/UploadedFolder/PIM/" + image.path)" />
+    }
+}
+
 <p>
     <a href="@Url.Content((string)ViewBag.ReturnUrl)">返回</a>
 </p>
