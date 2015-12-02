@@ -11,7 +11,7 @@
                 @Html.DisplayNameFor(model => model.TestTime)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.SerialNumber)
+                @Html.DisplayNameFor(model => model.SerialNumberId)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.AntennaUserId)
@@ -42,7 +42,7 @@
                     @Html.DisplayFor(modelItem => item.TestTime)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.SerialNumber)
+                    @Html.DisplayFor(modelItem => item.SerialNumber.Name)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.AntennaUser.UserName)

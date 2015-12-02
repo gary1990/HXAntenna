@@ -56,6 +56,8 @@
     <Reference Include="NPOI">
       <HintPath>C:\Users\GARY\Desktop\NPOI.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -66,6 +68,7 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
@@ -121,6 +124,10 @@
     <Reference Include="Antlr3.Runtime">
       <Private>True</Private>
       <HintPath>..\packages\Antlr.3.4.1.9004\lib\Antlr3.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="xps2img">
+      <HintPath>..\packages\xps2img.0.2.0\lib\net45\xps2img.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -198,9 +205,9 @@
     <Compile Include="Migrations\201501120951198_InitialCreate.Designer.cs">
       <DependentUpon>201501120951198_InitialCreate.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201512010755497_add_models_for_pim.cs" />
-    <Compile Include="Migrations\201512010755497_add_models_for_pim.Designer.cs">
-      <DependentUpon>201512010755497_add_models_for_pim.cs</DependentUpon>
+    <Compile Include="Migrations\201512011717271_add_models_for_pim.cs" />
+    <Compile Include="Migrations\201512011717271_add_models_for_pim.Designer.cs">
+      <DependentUpon>201512011717271_add_models_for_pim.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
@@ -424,8 +431,8 @@
     <EmbeddedResource Include="Migrations\201501120951198_InitialCreate.resx">
       <DependentUpon>201501120951198_InitialCreate.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201512010755497_add_models_for_pim.resx">
-      <DependentUpon>201512010755497_add_models_for_pim.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201512011717271_add_models_for_pim.resx">
+      <DependentUpon>201512011717271_add_models_for_pim.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

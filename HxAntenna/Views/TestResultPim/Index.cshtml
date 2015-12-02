@@ -33,7 +33,7 @@
                 @Html.DropDownList("AntennaUserId@=", new SelectList(Common<AntennaUser>.GetList("IsDeleted@=:false;AntennaRole.Name@=:测试员;"), "Id", "JobNumber"), String.Empty, new { @class = "filter", style = "width: 100px;" })
             </td>
             <td>
-                @Html.TextBox("SerialNumber@%", null, new { @class = "filter", style = "width: 150px;" })
+                @Html.TextBox("SerialNumber.Name@%", null, new { @class = "filter", style = "width: 150px;" })
             </td>
             <td>
                 @Html.CheckBox("TestResult@=", false, new { @class = "filter" })

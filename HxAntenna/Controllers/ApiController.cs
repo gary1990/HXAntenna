@@ -17,6 +17,7 @@ using HxAntenna.Models.Constant;
 using HxAntenna.Lib;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
+using xps2img;
 
 namespace HxAntenna.Controllers
 {
@@ -978,7 +979,7 @@ namespace HxAntenna.Controllers
                 }
 
                 //get TestResultPim records in DB
-                var testResultPimDbs = unitOfWork.TestResultPimRepository.Get(a => a.SerialNumber == serialNumber).ToList();
+                var testResultPimDbs = unitOfWork.TestResultPimRepository.Get(a => a.SerialNumber.Name == serialNumber).ToList();
                 if (testResultPimDbs.Count != 0)
                 {
                     foreach (var testResultPimDb in testResultPimDbs)
@@ -995,9 +996,33 @@ namespace HxAntenna.Controllers
                         }
                     }
                 }
+
+                //get SerialNumber in db or add new SerialNumber record to db
+                var serialNumberDb = unitOfWork.SerialNumberRepository.Get(a => a.Name == serialNumber).SingleOrDefault();
+                int serialNumberDbId;
+                if (serialNumberDb != null)
+                {
+                    serialNumberDbId = serialNumberDb.Id;
+                }
+                else
+                {
+                    try
+                    {
+                        SerialNumber serialNumberAdd = new SerialNumber { Name = serialNumber };
+                        unitOfWork.SerialNumberRepository.Insert(serialNumberAdd);
+                        unitOfWork.DbSaveChanges();
+                        serialNumberDbId = serialNumberAdd.Id;
+                    }
+                    catch (Exception /*e*/)
+                    {
+                        result.Message = "Insert SerialNumber failed";
+                        return new XmlResult<SingleResultXml>() { Data = result };
+                    }
+                }
+
                 //initialize new TestResultPim
                 TestResultPim testResultPim = new TestResultPim();
-                testResultPim.SerialNumber = serialNumber;
+                testResultPim.SerialNumberId = serialNumberDbId;
                 testResultPim.TestImage = testImage;
 
                 //read txt file
@@ -1333,6 +1358,383 @@ namespace HxAntenna.Controllers
                         }
                     }
                 }
+
+                var maxImPower = testResultPimPoints.Max(a => a.ImPower);
+                var maxImPowerPoint = testResultPimPoints.Where(a => a.ImPower == maxImPower).First();
+                maxImPowerPoint.isWorst = true;
+                //set TestResultPim.TestResultPimPoints
+                testResultPim.TestResultPimPoints = testResultPimPoints;
+                //set TestResultPim.TestResult
+                if (maxImPower < testResultPim.LimitLine)
+                {
+                    testResultPim.TestResult = true;
+                }
+
+                try
+                {
+                    unitOfWork.TestResultPimRepository.Insert(testResultPim);
+                    unitOfWork.DbSaveChanges();
+                }
+                catch (Exception /*e*/)
+                {
+                    result.Message = "Insert TestResultPim failed";
+                    return new XmlResult<SingleResultXml>()
+                    {
+                        Data = result
+                    };
+                }
+                scope.Complete();
+            }
+
+            return new XmlResult<SingleResultXml>() { Data = result };
+        }
+
+        public ActionResult UploadPimFileKaelus()
+        {
+            SingleResultXml result = new SingleResultXml() { Message = "true" };
+            HttpPostedFileBase file = Request.Files["file"];
+            string fileFullName;
+            string fileEx;
+            string fileNameWithoutEx;
+            string slash = "/";
+            string uploadTime = DateTime.Now.ToString("yyyyMMdd");
+            string uploadPath = AppDomain.CurrentDomain.BaseDirectory + "/UploadedFolder/PIM/Kaelus/" + uploadTime;
+            string savePath;
+            string saveFolderPath;
+
+            if (file == null || file.ContentLength <= 0)
+            {
+                result.Message = "file can not be null";
+                return new XmlResult<SingleResultXml>() { Data = result };
+            }
+
+            fileFullName = System.IO.Path.GetFileName(file.FileName);
+            fileEx = System.IO.Path.GetExtension(fileFullName);
+            fileNameWithoutEx = System.IO.Path.GetFileNameWithoutExtension(fileFullName);
+            if (fileEx.ToLower() != ".zip")
+            {
+                result.Message = "incorrect file type";
+                return new XmlResult<SingleResultXml>() { Data = result };
+            }
+            if (!System.IO.Directory.Exists(uploadPath))
+            {
+                try
+                {
+                    System.IO.Directory.CreateDirectory(uploadPath);
+                }
+                catch (Exception /*e*/)
+                {
+                    result.Message = "can not create upalod directory";
+                    return new XmlResult<SingleResultXml>() { Data = result };
+                }
+            }
+            savePath = System.IO.Path.Combine(uploadPath, fileFullName);
+            try
+            {
+                file.SaveAs(savePath);
+            }
+            catch (Exception /*e*/)
+            {
+                result.Message = "can not save uploaded file";
+                return new XmlResult<SingleResultXml>() { Data = result };
+            }
+
+            ZipFile zip = ZipFile.Read(savePath, new ReadOptions { Encoding = Encoding.Default });
+            try
+            {
+                //unzip file
+                zip.AlternateEncoding = Encoding.Default;
+                zip.ExtractAll(uploadPath + slash + fileNameWithoutEx, ExtractExistingFileAction.OverwriteSilently);
+            }
+            catch (Exception /*e*/)
+            {
+                result.Message = "can not unzip file";
+                zip.Dispose();
+                return new XmlResult<SingleResultXml>() { Data = result };
+            }
+            zip.Dispose();
+
+            using (var scope = new TransactionScope())
+            {
+                saveFolderPath = uploadPath + slash + fileNameWithoutEx;
+                
+                //序列号
+                string serialNumberStr = "";
+                //测试时间
+                string testTimeStr = "";
+                //测试方式
+                string testMeansStr = "";
+                //阶数
+                string orderNumberStr;
+                //单位
+                string imUnitStr;
+                //极限值
+                string limitLineStr;
+                //测试图像
+                string testImage = "";
+                //测试值
+                List<TestResultPimPoint> testResultPimPoints = new List<TestResultPimPoint> { };
+
+                string txtFilePath = "";
+                string xpsFilePath = "";
+                string[] txtFiles = Directory.GetFiles(saveFolderPath, "*.txt");
+                if (txtFiles.Count() != 1)
+                {
+                    result.Message = "The number of txt incorrect";
+                    return new XmlResult<SingleResultXml>() { Data = result };
+                }
+                else
+                {
+                    //get serial number, txt file without extension
+                    serialNumberStr = System.IO.Path.GetFileNameWithoutExtension(txtFiles[0]);
+                    txtFilePath = saveFolderPath + slash + serialNumberStr + ".txt";
+                    xpsFilePath = saveFolderPath + slash + serialNumberStr + ".xps";
+                }
+                
+                if (!System.IO.File.Exists(txtFilePath))
+                {
+                    result.Message = "can not find " + serialNumberStr + ".txt file";
+                    return new XmlResult<SingleResultXml>() { Data = result };
+                }
+
+                //convert xps to image
+                try {
+                    var xpsConverter = new Xps2Image(xpsFilePath);
+                    var images = xpsConverter.ToBitmap(new Parameters
+                    {
+                        ImageType = ImageType.Png,
+                        Dpi = 100
+                    });
+
+                    images.SingleOrDefault().Save(saveFolderPath + slash + serialNumberStr + ".png");
+                    testImage = "/Kaelus/" + uploadTime + slash + fileNameWithoutEx + slash + serialNumberStr + ".png";
+                } catch(Exception /*e*/) {
+                    result.Message = "can not convert " + serialNumberStr + ".xps file";
+                    return new XmlResult<SingleResultXml>() { Data = result };
+                }
+
+                //get TestResultPim records in DB
+                var testResultPimDbs = unitOfWork.TestResultPimRepository.Get(a => a.SerialNumber.Name == serialNumberStr).ToList();
+                if (testResultPimDbs.Count != 0)
+                {
+                    foreach (var testResultPimDb in testResultPimDbs)
+                    {
+                        try
+                        {
+                            testResultPimDb.IsLatest = false;
+                            unitOfWork.DbSaveChanges();
+                        }
+                        catch (Exception /*e*/)
+                        {
+                            result.Message = "update TestResultPim Old record failed";
+                            return new XmlResult<SingleResultXml>() { Data = result };
+                        }
+                    }
+                }
+
+                //get SerialNumber in db or add new SerialNumber record to db
+                var serialNumberDb = unitOfWork.SerialNumberRepository.Get(a => a.Name == serialNumberStr).SingleOrDefault();
+                int serialNumberDbId;
+                if (serialNumberDb != null)
+                {
+                    serialNumberDbId = serialNumberDb.Id;
+                }
+                else
+                {
+                    try
+                    {
+                        SerialNumber serialNumberAdd = new SerialNumber { Name = serialNumberStr };
+                        unitOfWork.SerialNumberRepository.Insert(serialNumberAdd);
+                        unitOfWork.DbSaveChanges();
+                        serialNumberDbId = serialNumberAdd.Id;
+                    }
+                    catch (Exception /*e*/)
+                    {
+                        result.Message = "Insert SerialNumber failed";
+                        return new XmlResult<SingleResultXml>() { Data = result };
+                    }
+                }
+
+                //initialize new TestResultPim
+                TestResultPim testResultPim = new TestResultPim();
+                testResultPim.SerialNumberId = serialNumberDbId;
+                testResultPim.TestImage = testImage;
+
+                //read txt file
+                StreamReader srTxt = new StreamReader(txtFilePath);
+                string txtLine = string.Empty;
+                string[] txtLineArr = null;
+                int lineNumber = 0;
+                // Read the file and display it line by line.
+                while ((txtLine = srTxt.ReadLine()) != null)
+                {
+                    //first line is title
+                    if (lineNumber != 0)
+                    {
+                        //System.Diagnostics.Debug.WriteLine(txtLine);
+                        txtLineArr = txtLine.Split('\t');
+                        //标准格式为27列
+                        if (txtLineArr.Length == 27)
+                        {
+                            //处理测试时间
+                            if (testTimeStr == "")
+                            {
+                                testTimeStr = txtLineArr[1] + " " + txtLineArr[2];
+                                string[] timeFormat = new string[] { "M/dd/yyyy h:m:s tt", "M/dd/yyyy h:mm:ss tt" };
+                                DateTime testTime;
+                                if (!DateTime.TryParseExact(testTimeStr, timeFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out testTime))
+                                {
+                                    srTxt.Close();
+                                    result.Message = "line " + lineNumber + " Test Time : " + testTimeStr + " parse failed";
+                                    return new XmlResult<SingleResultXml>() { Data = result };
+                                }
+                                //set TestResultPim.TestTime
+                                testResultPim.TestTime = testTime;
+                            }
+                            //处理测试方式
+                            if (testMeansStr == "") {
+                                testMeansStr = txtLineArr[3];
+                                if (testMeansStr.ToUpper() == "Swept IM") {
+                                    testResultPim.TestMeans = TestMeans.Sweep;
+                                }
+                                else
+                                {
+                                    testResultPim.TestMeans = TestMeans.Sweep;
+                                }
+                            }
+                            //测试描述
+                            if (String.IsNullOrEmpty(testResultPim.TestDescription)) {
+                                testResultPim.TestDescription = txtLineArr[4];
+                            }
+
+                            //设置阶数
+                            if (testResultPim.ImOrderId == 0)
+                            {
+                                //ImOrder.OrderNumber
+                                orderNumberStr = txtLineArr[21];
+                                int orderNumber;
+                                if (!int.TryParse(orderNumberStr.Substring(0, orderNumberStr.Length - 2), out orderNumber))
+                                {
+                                    srTxt.Close();
+                                    result.Message = "line " + lineNumber + " " + orderNumberStr + " parse failed";
+                                    return new XmlResult<SingleResultXml>() { Data = result };
+                                }
+                                //ImOrder.ImUnit
+                                imUnitStr = txtLineArr[26];
+                                ImUnit imUnit;
+                                if (imUnitStr.ToUpper() == "DBC")
+                                {
+                                    imUnit = ImUnit.dBc;
+                                }
+                                else if (imUnitStr.ToUpper() == "DBM")
+                                {
+                                    imUnit = ImUnit.dBm;
+                                }
+                                else
+                                {
+                                    srTxt.Close();
+                                    result.Message = "line " + lineNumber + " Power unit: " + imUnitStr + " parse failed";
+                                    return new XmlResult<SingleResultXml>()
+                                    {
+                                        Data = result
+                                    };
+                                }
+                                //set TestResultPim.ImOrderId
+                                ImOrder imOrder = new ImOrder() { OrderNumber = orderNumber, ImUnit = imUnit };
+                                //get ImOrder from db
+                                var imOrderDb = unitOfWork.ImOrderRepository.Get(a => a.OrderNumber == orderNumber && a.ImUnit == imUnit).SingleOrDefault();
+                                if (imOrderDb == null)
+                                {
+                                    try
+                                    {
+                                        unitOfWork.ImOrderRepository.Insert(imOrder);
+                                        unitOfWork.DbSaveChanges();
+                                        testResultPim.ImOrderId = imOrder.Id;
+                                    }
+                                    catch (Exception /*e*/)
+                                    {
+                                        srTxt.Close();
+                                        result.Message = "line " + lineNumber + ", Insert IMOrder failed";
+                                        return new XmlResult<SingleResultXml>()
+                                        {
+                                            Data = result
+                                        };
+                                    }
+                                }
+                                else
+                                {
+                                    testResultPim.ImOrderId = imOrderDb.Id;
+                                }
+                            }
+                            //设置LimitLine
+                            if (testResultPim.LimitLine == 0) 
+                            {
+                                limitLineStr = txtLineArr[24];
+                                decimal limitLine;
+                                if (!Decimal.TryParse(limitLineStr, out limitLine))
+                                {
+                                    srTxt.Close();
+                                    result.Message = "line " + lineNumber + " Limitline: " + limitLineStr + " parse failed";
+                                    return new XmlResult<SingleResultXml>() { Data = result };
+                                }
+                                //set TestResultPim.LimitLine
+                                testResultPim.LimitLine = limitLine;
+                            }
+                            //添加当前的testResultPimPoint
+                            string carrierOneFreqStr = txtLineArr[8];
+                            decimal carrierOneFreq;
+                            if (!Decimal.TryParse(carrierOneFreqStr, out carrierOneFreq))
+                            {
+                                srTxt.Close();
+                                result.Message = "line " + lineNumber + " carrierOneFreq: " + carrierOneFreqStr + " parse failed";
+                                return new XmlResult<SingleResultXml>() { Data = result };
+                            }
+                            string carrierTwoFreqStr = txtLineArr[9];
+                            decimal carrierTwoFreq;
+                            if (!Decimal.TryParse(carrierTwoFreqStr, out carrierTwoFreq))
+                            {
+                                srTxt.Close();
+                                result.Message = "line " + lineNumber + " carrierTwoFreq: " + carrierTwoFreqStr + " parse failed";
+                                return new XmlResult<SingleResultXml>() { Data = result };
+                            }
+                            string imFreqStr = txtLineArr[22];
+                            decimal imFreq;
+                            if (!Decimal.TryParse(imFreqStr, out imFreq))
+                            {
+                                srTxt.Close();
+                                result.Message = "line " + lineNumber + " imFreq: " + imFreqStr + " parse failed";
+                                return new XmlResult<SingleResultXml>() { Data = result };
+                            }
+                            string imPowerStr = txtLineArr[23];
+                            decimal imPower;
+                            if (!Decimal.TryParse(imPowerStr, out imPower))
+                            {
+                                srTxt.Close();
+                                result.Message = "line " + lineNumber + " imPower: " + imPowerStr + " parse failed";
+                                return new XmlResult<SingleResultXml>()
+                                {
+                                    Data = result
+                                };
+                            }
+                            TestResultPimPoint testResultPimPoint = new TestResultPimPoint
+                            {
+                                CarrierOneFreq = carrierOneFreq,
+                                CarrierTwoFreq = carrierTwoFreq,
+                                ImFreq = imFreq,
+                                ImPower = imPower
+                            };
+                            testResultPimPoints.Add(testResultPimPoint);
+                        }
+                        else
+                        {
+                            srTxt.Close();
+                            result.Message = "txt file column number wrong, in line: " + (lineNumber + 1);
+                            return new XmlResult<SingleResultXml>() { Data = result };
+                        }
+                    }
+                    lineNumber++;
+                }
+                srTxt.Close();
 
                 var maxImPower = testResultPimPoints.Max(a => a.ImPower);
                 var maxImPowerPoint = testResultPimPoints.Where(a => a.ImPower == maxImPower).First();

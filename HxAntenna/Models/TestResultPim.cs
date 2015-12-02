@@ -20,12 +20,13 @@ namespace HxAntenna.Models
         [DisplayName("测试时间")]
         public DateTime TestTime { get; set; }
         [DisplayName("序列号")]
-        public string SerialNumber { get; set; }
+        public int SerialNumberId { get; set; }
+        public virtual SerialNumber SerialNumber { get; set; }
         [DisplayName("测试员")]
         public string AntennaUserId { get; set; }
         public virtual AntennaUser AntennaUser { get; set; }
         [DisplayName("测试设备")]
-        public int TestEquipmentId { get; set; }
+        public int? TestEquipmentId { get; set; }
         public virtual TestEquipment TestEquipment { get; set; }
         [DisplayName("阶数")]
         public int ImOrderId { get; set; }
@@ -41,6 +42,7 @@ namespace HxAntenna.Models
         public bool IsLatest { get; set; }
         [DisplayName("极限值")]
         public decimal LimitLine { get; set; }
+
         public virtual ICollection<Carrier> Carriers { get; set; }
         public virtual ICollection<TestResultPimPoint> TestResultPimPoints { get; set; }
     }

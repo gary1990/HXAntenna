@@ -12,7 +12,7 @@
                 @Html.DisplayNameFor(model => model.TestTime)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.SerialNumber)
+                @Html.DisplayNameFor(model => model.SerialNumberId)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.AntennaUserId)
@@ -40,7 +40,7 @@
                 @Html.DisplayFor(model => model.TestTime)
             </td>
             <td>
-                @Html.DisplayFor(model => model.SerialNumber)
+                @Html.DisplayFor(model => model.SerialNumber.Name)
             </td>
             <td>
                 @Html.DisplayFor(model => model.AntennaUser.UserName)
@@ -72,27 +72,31 @@
         </tr>
     </tbody>
 </table>
-<table>
-    <thead>
-        <tr>
-            <th>固定频率</th>
-            <th>起始频率</th>
-            <th>终止频率</th>
-            <th>输出功率</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var itemCarrier in Model.Carriers)
-        {
+@if (Model.Carriers.Count > 0)
+{
+    <table>
+        <thead>
             <tr>
-                <td>@itemCarrier.SetFreq</td>
-                <td>@itemCarrier.StartFreq</td>
-                <td>@itemCarrier.StopFreq</td>
-                <td>@itemCarrier.Power</td>
+                <th>固定频率</th>
+                <th>起始频率</th>
+                <th>终止频率</th>
+                <th>输出功率</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var itemCarrier in Model.Carriers)
+            {
+                <tr>
+                    <td>@itemCarrier.SetFreq</td>
+                    <td>@itemCarrier.StartFreq</td>
+                    <td>@itemCarrier.StopFreq</td>
+                    <td>@itemCarrier.Power</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
 <table>
     <thead>
         <tr>

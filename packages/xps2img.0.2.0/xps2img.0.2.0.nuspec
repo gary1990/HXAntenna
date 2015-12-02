@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>xps2img</id>
+    <version>0.2.0</version>
+    <title>xps2image</title>
+    <authors>Peter Sunde / Ivan Ivon</authors>
+    <owners>Peter Sunde / Ivan Ivon</owners>
+    <licenseUrl>https://raw.github.com/peters/xps2image/develop/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/peters/xps2img</projectUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>Convert xps documents to a .NET bitmap</description>
+    <summary>Convert xps documents to a .NET bitmap (multiple pages are supported, including setting dpi)</summary>
+    <copyright>Peter Sunde / Ivan Ivon</copyright>
+    <tags>xps image conversion</tags>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="PresentationCore" targetFramework="" />
+      <frameworkAssembly assemblyName="PresentationFramework" targetFramework="" />
+      <frameworkAssembly assemblyName="System.Drawing" targetFramework="" />
+      <frameworkAssembly assemblyName="System.Xaml" targetFramework="" />
+      <frameworkAssembly assemblyName="WindowsBase" targetFramework="" />
+    </frameworkAssemblies>
+  </metadata>
+</package>

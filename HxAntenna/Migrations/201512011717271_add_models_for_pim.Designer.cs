@@ -13,7 +13,7 @@ namespace HxAntenna.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "201512010755497_add_models_for_pim"; }
+            get { return "201512011717271_add_models_for_pim"; }
         }
         
         string IMigrationMetadata.Source
